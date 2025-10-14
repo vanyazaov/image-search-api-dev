@@ -1,8 +1,10 @@
 <!-- resources/views/admin/images/index.blade.php -->
 <x-app-layout>
 
-<div class="container mx-auto px-4">
-    <h1 class="text-2xl font-bold mb-6">Управление изображениями</h1>
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Управление изображениями</h1>
+    </div>
 
     <!-- Сообщения об успехе/ошибке -->
     @if(session('success'))

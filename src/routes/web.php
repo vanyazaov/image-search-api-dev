@@ -20,6 +20,18 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::resource('images', ImageAdminController::class);
+    
+    // Subscription management
+    Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class)
+         ->only(['index', 'edit', 'update', 'destroy']);
+    
+    Route::post('subscriptions/{user}/generate-key', 
+                [\App\Http\Controllers\Admin\SubscriptionController::class, 'generateApiKey'])
+         ->name('subscriptions.generate-key');
+    
+    Route::post('subscriptions/{user}/reset-usage', 
+                [\App\Http\Controllers\Admin\SubscriptionController::class, 'resetUsage'])
+         ->name('subscriptions.reset-usage');
 });
 
 require __DIR__.'/auth.php';

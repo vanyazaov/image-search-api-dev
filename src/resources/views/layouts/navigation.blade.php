@@ -22,6 +22,11 @@
                             {{ __('Images') }}
                         </x-nav-link>
                     </div>
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('admin.subscriptions.index')" :active="request()->routeIs('admin.subscriptions.*')">
+                            {{ __('Subscriptions') }}
+                        </x-nav-link>
+                    </div>
                 @endif
             </div>
 
