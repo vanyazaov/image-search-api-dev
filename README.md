@@ -1,7 +1,7 @@
 # Image Search API Service 🖼️
 
 ![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php)
-![Laravel](https://img.shields.io/badge/Laravel-10-FF2D20?logo=laravel)
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel)
 ![ElasticSearch](https://img.shields.io/badge/ElasticSearch-8.0-005571?logo=elasticsearch)
 ![Docker](https://img.shields.io/badge/Docker-✓-2496ED?logo=docker)
 
