@@ -21,6 +21,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'api_key',
+        'request_limit',
+        'requests_used',
+        'subscription_valid_until',
+        'is_active',
+        'role',
+        'meta'
     ];
 
     /**
@@ -31,6 +38,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'api_key'
     ];
 
     /**
@@ -43,6 +51,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'subscription_valid_until' => 'datetime',
+            'is_active' => 'boolean',
+            'meta' => 'array'
         ];
     }
+    
+    public function isValidSubscription(): bool
+    {
+        return $this->is_active && 
+               $this->subscription_valid_until?->isFuture() && 
+               $this->requests_used < $this->request_limit;
+    }
+
+    public function incrementRequestCount(): void
+    {
+        $this->increment('requests_used');
+    }
+
+    public static function findByApiKey(string $apiKey): ?self
+    {
+        return static::where('api_key', $apiKey)->first();
+    }    
 }
