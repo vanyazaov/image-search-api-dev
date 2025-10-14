@@ -21,16 +21,58 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name,
+            'email' => $this->faker->unique()->safeEmail,
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'password' => bcrypt('password'),
+            'role' => 'buyer',
+            'api_key' => Str::random(64),
+            'request_limit' => 1000,
+            'requests_used' => 0,
+            'subscription_valid_until' => now()->addYear(),
+            'is_active' => true,
         ];
     }
+    
+    public function admin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => 'admin',
+            ];
+        });
+    }
+    
+    public function inactive()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_active' => false,
+            ];
+        });
+    } 
+    
+    public function expired()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'subscription_valid_until' => now()->subDay(),
+            ];
+        });
+    }
+    
+    public function limitExceeded()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'requests_used' => 1000,
+                'request_limit' => 1000,
+            ];
+        });
+    }           
 
     /**
      * Indicate that the model's email address should be unverified.
