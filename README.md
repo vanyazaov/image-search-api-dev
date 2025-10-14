@@ -4,7 +4,6 @@
 ![Laravel](https://img.shields.io/badge/Laravel-10-FF2D20?logo=laravel)
 ![ElasticSearch](https://img.shields.io/badge/ElasticSearch-8.0-005571?logo=elasticsearch)
 ![Docker](https://img.shields.io/badge/Docker-✓-2496ED?logo=docker)
-![Tests](https://img.shields.io/badge/Tests-100%25 passing-green)
 
 Профессиональный микросервис для поиска и обработки изображений с API на основе подписок.
 
@@ -92,17 +91,6 @@ Headers: X-API-Key: your_api_key_here
 - **Event-Driven Design** - асинхронная обработка через очереди
 - **RESTful API** - чистые и предсказуемые endpoints
 - **Horizontal Scaling** - готовность к масштабированию
-
-graph TB
-    A[Клиент] --> B[NGINX]
-    B --> C[Laravel App]
-    C --> D[PostgreSQL]
-    C --> E[Redis]
-    C --> F[ElasticSearch]
-    C --> G[RabbitMQ]
-    G --> H[Queue Workers]
-    H --> I[Image Processing]
-    H --> J[Search Indexing]
 
 ## 👨‍💻 Автор
 
