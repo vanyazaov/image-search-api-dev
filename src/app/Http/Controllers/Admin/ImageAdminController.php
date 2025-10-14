@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\ProcessImageUpload;
+use App\Jobs\IndexImageInElasticsearch;
+use App\Services\ElasticSearchService;
 
 class ImageAdminController extends Controller
 {
@@ -41,6 +44,18 @@ class ImageAdminController extends Controller
 
             // Сохраняем во временное хранилище
             $path = Storage::putFileAs('temp', $file, $tempFilename);
+            
+            // Получаем полный путь (если нужно для обработки)
+            $tempPath = Storage::path($path);
+            
+            // Запускаем обработку в фоне
+            ProcessImageUpload::dispatch($tempPath, [
+                'original_filename' => $request->file('image')->getClientOriginalName(),
+                'title' => $validated['title'],
+                'category' => $validated['category'],
+                'brand' => $validated['brand'],
+                'meta' => $validated['meta'] ?? []
+            ]);
 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -56,6 +71,9 @@ class ImageAdminController extends Controller
     {
         // Удаляем файлы
         Storage::delete([$image->file_path, "thumbnails/{$image->id}.jpg"]);
+        
+        // Удаляем из ElasticSearch
+        $elasticSearch->deleteImage($image->id);
         
         // Удаляем из базы
         $image->delete();
