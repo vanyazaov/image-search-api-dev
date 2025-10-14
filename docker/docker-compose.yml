@@ -1,0 +1,118 @@
+version: '3.8'
+services:
+  mpv_app:
+    build:
+      context: ./php
+    container_name: mpv_image_search_api_app
+    working_dir: /var/www/html
+    volumes:
+      - ../src:/var/www/html
+    environment:
+      - PHP_MEMORY_LIMIT=512M
+    depends_on:
+      - mpv_postgres
+      - mpv_redis
+      - mpv_elasticsearch
+      - mpv_rabbitmq
+    networks:
+      - mpv_appnet
+
+  mpv_nginx:
+    image: nginx:alpine
+    container_name: mpv_image_search_api_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ../src:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - mpv_app
+    networks:
+      - mpv_appnet
+
+  mpv_postgres:
+    image: postgres:15
+    container_name: mpv_image_search_api_pg
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: mpv_image_search_api_pg
+    ports:
+      - "5433:5432"
+    networks:
+      - mpv_appnet
+    volumes:
+      - ../data/postgres:/var/lib/postgresql/data      
+
+  mpv_redis:
+    image: redis:alpine
+    container_name: mpv_image_search_api_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mpv_appnet
+    volumes:
+      - ../data/redis:/data      
+
+  mpv_rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mpv_image_search_api_rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - mpv_appnet
+    volumes:
+      - ../data/rabbitmq:/var/lib/rabbitmq      
+
+  mpv_elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: mpv_image_search_api_es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - cluster.routing.allocation.disk.watermark.low=90%
+      - cluster.routing.allocation.disk.watermark.high=95%
+      - cluster.routing.allocation.disk.watermark.flood_stage=99%
+      - ELASTIC_PASSWORD=password
+    ports:
+      - "9200:9200"
+    networks:
+      - mpv_appnet
+    volumes:
+      - ../data/elasticsearch:/usr/share/elasticsearch/data 
+      
+
+  mpv_node_build:
+    image: node:22-alpine
+    container_name: mpv_image_search_api_node
+    working_dir: /app
+    volumes:
+      - ../src:/app
+    command: >
+      sh -c "
+        npm install &&
+        npm run build
+      "
+    networks:
+      - mpv_appnet
+    depends_on:
+      - mpv_app      
+      
+  mpv_adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mpv_postgres
+    networks:
+      - mpv_appnet          
+
+networks:
+  mpv_appnet:
+    driver: bridge
+
